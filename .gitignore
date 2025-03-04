@@ -2,6 +2,7 @@ venv/
 *.env
 .env
 .venv
+file_tree.txt
 
 __pycache__/
 *.py[cod]
