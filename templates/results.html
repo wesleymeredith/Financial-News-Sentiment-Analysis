@@ -1,0 +1,26 @@
+<table border="1">
+    <tr>
+        <th>Title</th>
+        <th>Source</th>
+        <th>Published Date</th>
+        <th>Sentiment Score</th>
+        <th>Link</th>
+    </tr>
+    {% for article in articles %}
+    <tr>
+        <td>{{ article.title }}</td>
+        <td>{{ article.source }}</td>
+        <td>{{ article.published_at[:10] }}</td>  <!-- Extract YYYY-MM-DD from ISO format -->
+        <td>
+            {% if article.sentiment_score > 0.05 %}
+                <span style="color: green;">Positive</span>
+            {% elif article.sentiment_score < -0.05 %}
+                <span style="color: red;">Negative</span>
+            {% else %}
+                <span style="color: gray;">Neutral</span>
+            {% endif %}
+        </td>
+        <td><a href="{{ article.url }}" target="_blank">Read</a></td>
+    </tr>
+    {% endfor %}
+</table>
