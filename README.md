@@ -1,11 +1,11 @@
 # Financial News Sentiment Analyzer
 
 ## Description
-A Python-based web application that performs sentiment analysis on financial news articles using the NewsAPI and NLTK's VADER sentiment analysis tool. The application scrapes recent financial news, analyzes the sentiment, and provides insights into the emotional tone of financial reporting.
+A Python-based web application that performs sentiment analysis on financial news articles using the NewsAPI, BERT, and NLTK. The application scrapes recent financial news, analyzes the sentiment, and provides insights into the emotional tone of financial reporting.
 
 ## Features
 - Fetch latest financial news using NewsAPI
-- Perform sentiment analysis using NLTK VADER
+- Perform sentiment analysis using BERT
 - Web interface to display news sentiment results
 - Categorize news articles by sentiment (positive, negative, neutral)
 
