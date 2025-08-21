@@ -1,26 +1,157 @@
-<table border="1">
-    <tr>
-        <th>Title</th>
-        <th>Source</th>
-        <th>Published Date</th>
-        <th>Sentiment Score</th>
-        <th>Link</th>
-    </tr>
-    {% for article in articles %}
-    <tr>
-        <td>{{ article.title }}</td>
-        <td>{{ article.source }}</td>
-        <td>{{ article.published_at[:10] }}</td>  <!-- Extract YYYY-MM-DD from ISO format -->
-        <td>
-            {% if article.sentiment_score > 0.05 %}
-                <span style="color: green;">Positive</span>
-            {% elif article.sentiment_score < -0.05 %}
-                <span style="color: red;">Negative</span>
-            {% else %}
-                <span style="color: gray;">Neutral</span>
-            {% endif %}
-        </td>
-        <td><a href="{{ article.url }}" target="_blank">Read</a></td>
-    </tr>
-    {% endfor %}
-</table>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+    <title>Analysis Results - Financial Sentiment Analyzer</title>
+    
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-container" id="loadingScreen">
+        <div class="loading-box">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Analyzing Sentiment</div>
+            <div class="loading-subtext">Processing financial news for {{ ticker }}...</div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <a href="/" class="back-button">← Back to Search</a>
+
+    <!-- Results Container -->
+    <div class="results-container" id="resultsContainer">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>Sentiment Analysis Results</h1>
+            <div class="ticker">${{ ticker }}</div>
+            
+            {% set positive_count = articles | selectattr('sentiment_score', '>', 0.05) | list | length %}
+            {% set negative_count = articles | selectattr('sentiment_score', '<', -0.05) | list | length %}
+            {% set neutral_count = (articles | length) - positive_count - negative_count %}
+            
+            <div class="sentiment-summary">
+                <div class="sentiment-count positive">
+                    <div class="number">{{ positive_count }}</div>
+                    <div class="label">Positive</div>
+                </div>
+                <div class="sentiment-count negative">
+                    <div class="number">{{ negative_count }}</div>
+                    <div class="label">Negative</div>
+                </div>
+                <div class="sentiment-count neutral">
+                    <div class="number">{{ neutral_count }}</div>
+                    <div class="label">Neutral</div>
+                </div>
+            </div>
+            
+            <div class="summary">
+                Found {{ articles | length }} articles from the last 14 days
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        {% if articles %}
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Source</th>
+                            <th>Published Date</th>
+                            <th>Sentiment Score</th>
+                            <th>Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for article in articles %}
+                        <tr>
+                            <td class="title-cell" title="{{ article.title }}">{{ article.title }}</td>
+                            <td>{{ article.source or 'Unknown' }}</td>
+                            <td>
+                                {% if article.published_at %}
+                                    {{ article.published_at[:10] }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if article.sentiment_score > 0.05 %}
+                                    <span class="sentiment-positive">Positive</span>
+                                {% elif article.sentiment_score < -0.05 %}
+                                    <span class="sentiment-negative">Negative</span>
+                                {% else %}
+                                    <span class="sentiment-neutral">Neutral</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if article.url %}
+                                    <a href="{{ article.url }}" class="read-link" target="_blank">Read</a>
+                                {% else %}
+                                    <span style="color: #a0aec0;">No Link</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="table-container">
+            <div class="no-results">
+                <h2>No Articles Found</h2>
+                <p>We couldn't find any recent news articles for {{ ticker }}. Try a different ticker symbol or check back later.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const resultsContainer = document.getElementById('resultsContainer');
+            
+            // Show loading for a brief moment, then fade to results
+            setTimeout(() => {
+                loadingScreen.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    resultsContainer.classList.add('show');
+                }, 800);
+                
+            }, 1500); // Show loading for 1.5 seconds
+        });
+
+        // Get sentiment counts from the template variables
+        const positiveCount = {{ positive_count }};
+        const negativeCount = {{ negative_count }};
+        const neutralCount = {{ neutral_count }};
+
+        // Determine overall sentiment
+        let overallSentiment = 'neutral';
+        if (positiveCount > negativeCount && positiveCount > neutralCount) {
+            overallSentiment = 'positive';
+        } else if (negativeCount > positiveCount && negativeCount > neutralCount) {
+            overallSentiment = 'negative';
+        }
+
+        // Apply background based on sentiment
+        if (overallSentiment === 'positive') {
+            document.body.style.background = 'linear-gradient(135deg, #134e5e 0%, #71b280 100%)';
+        } else if (overallSentiment === 'negative') {
+            document.body.style.background = 'linear-gradient(135deg, #cd6155 0%, #922b21 100%)';
+        } else {
+            // Keep your current gradient for neutral
+            document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        }
+    </script>
+    
+    <footer class="footer">
+        © 2024 Wesley Meredith. All rights reserved. | Financial Sentiment Analyzer
+    </footer>
+</body>
+</html>

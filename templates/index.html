@@ -1,17 +1,87 @@
-<!DOCTYPE html>
+<!-- ----------------------------------------------------------------------------------------------------------------------------- -->
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
     <title>Financial Sentiment Analyzer</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
 </head>
 <body>
-    <h1>Financial Sentiment Analyzer</h1>
-    <form action="/" method="POST">
-        <label for="ticker">Enter Stock Ticker:</label>
-        <input type="text" id="ticker" name="ticker" required>
-        <button type="submit">Analyze</button>
-    </form>
+    <div class="container">
+        <h1>Financial Sentiment Analyzer</h1>
+        <p class="subtitle">Get AI-powered sentiment analysis from the latest financial news</p>
+        
+        <form action="/" method="POST">
+            <label for="ticker">Stock Ticker Symbol</label>
+            <input type="text" id="ticker" name="ticker" placeholder="e.g., AAPL, TSLA, MSFT" required maxlength="5">
+            <button type="submit" id="analyzeBtn">
+                <div class="button-content">
+                    <div class="spinner"></div>
+                    <span class="button-text">Analyze Sentiment</span>
+                </div>
+                <div class="loading-bar"></div>
+            </button>
+        </form>
+        
+        <div class="features">
+            <div class="feature">Real-time News</div>
+            <div class="feature">AI Analysis</div>
+            <div class="feature">Market Insights</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const button = document.getElementById('analyzeBtn');
+            const loadingBar = document.querySelector('.loading-bar');
+            const buttonText = document.querySelector('.button-text');
+            const tickerInput = document.getElementById('ticker');
+
+            form.addEventListener('submit', function(e) {
+                // Start loading state
+                button.classList.add('loading');
+                loadingBar.classList.add('active');
+                buttonText.textContent = 'Analyzing...';
+                button.disabled = true;
+                
+                // Validation
+                const ticker = tickerInput.value.trim().toUpperCase();
+                if (ticker.length < 1 || ticker.length > 5) {
+                    e.preventDefault();
+                    resetButton();
+                    alert('Please enter a valid stock ticker (1-5 characters)');
+                    return;
+                }
+            });
+
+            function resetButton() {
+                button.classList.remove('loading');
+                loadingBar.classList.remove('active');
+                buttonText.textContent = 'Analyze Sentiment';
+                button.disabled = false;
+            }
+
+            // Auto-format ticker input
+            tickerInput.addEventListener('input', function(e) {
+                e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+                if (e.target.value.length > 5) {
+                    e.target.value = e.target.value.substring(0, 5);
+                }
+            });
+
+            // Reset button if user navigates back
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) {
+                    resetButton();
+                }
+            });
+        });
+    </script>
+    <footer class="footer">
+        © 2024 Wesley Meredith. All rights reserved. | Financial Sentiment Analyzer
+    </footer>
 </body>
 </html>

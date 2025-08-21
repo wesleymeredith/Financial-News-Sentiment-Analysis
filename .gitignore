@@ -3,6 +3,7 @@ venv/
 .env
 .venv
 file_tree.txt
+dev_notes.txt
 
 __pycache__/
 *.py[cod]
@@ -20,7 +21,7 @@ config.json
 *.swo
 *~
 
-static/
+
 staticfiles/
 
 dist/
