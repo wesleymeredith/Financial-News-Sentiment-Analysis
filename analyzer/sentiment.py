@@ -1,16 +1,21 @@
 import numpy as np
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-import torch
+import requests
+import os
+from dotenv import load_dotenv
 import string
+import time
 
-#Use BERT model for sentiment analysis
+#vercel-sentiment-app
+load_dotenv()
+
+# Use BERT model for sentiment analysis via HuggingFace API
 class SentimentAnalyzer:
-    def __init__(self, model_name="distilbert-base-uncased-finetuned-sst-2-english"):
-        # Load pre-trained model and tokenizer
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model.to(self.device)
+    def __init__(self, model_name="distilbert/distilbert-base-uncased-finetuned-sst-2-english"):
+        # Store model name and setup API
+        self.model_name = model_name
+        self.api_token = os.getenv('HF_API_TOKEN')
+        self.headers = {"Authorization": f"Bearer {self.api_token}"}
+        self.api_url = f"https://api-inference.huggingface.co/models/{model_name}"
         
     def preprocess_text(self, text):
         # Convert text to lowercase for uniformity
@@ -25,25 +30,50 @@ class SentimentAnalyzer:
             
         text = self.preprocess_text(text)
         
-        # Tokenize and prepare for model
-        inputs = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512).to(self.device)
+        # Call HuggingFace API
+        payload = {"inputs": text}
         
-        # Get prediction
-        with torch.no_grad():
-            outputs = self.model(**inputs)
-            scores = outputs.logits.softmax(dim=1)
+        try:
+            response = requests.post(self.api_url, headers=self.headers, json=payload)
             
-        # Convert to sentiment score in range [-1, 1] similar to VADER
-        # Assuming index 0 is negative and index 1 is positive
-        negative_score = scores[0, 0].item()
-        positive_score = scores[0, 1].item()
-        
-        # Calculate compound score similar to VADER's compound
-        compound = positive_score - negative_score
-        
-        return compound
+            if response.status_code == 503:
+                # Model is loading, wait and retry once
+                time.sleep(20)
+                response = requests.post(self.api_url, headers=self.headers, json=payload)
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Process the result to match your original output format
+                if result and isinstance(result, list) and len(result) > 0:
+                    scores = result[0]
+                    
+                    negative_score = 0
+                    positive_score = 0
+                    
+                    # Extract scores based on labels
+                    for score_item in scores:
+                        if score_item['label'] == 'NEGATIVE':
+                            negative_score = score_item['score']
+                        elif score_item['label'] == 'POSITIVE':
+                            positive_score = score_item['score']
+                    
+                    # Calculate compound score similar to your original method
+                    compound = positive_score - negative_score
+                    return compound
+                else:
+                    return 0  # Neutral if no valid result
+            else:
+                print(f"API Error: {response.status_code} - {response.text}")
+                return 0  # Return neutral on error
+                
+        except requests.exceptions.RequestException as e:
+            print(f"Request failed: {e}")
+            return 0  # Return neutral on error
         
     def analyze_articles(self, articles):
         for article in articles:
             article['sentiment_score'] = self.analyze_sentiment(article['content'])
+            # Small delay to respect API rate limits
+            time.sleep(0.1)
         return articles

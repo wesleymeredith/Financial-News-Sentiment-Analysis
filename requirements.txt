@@ -1,9 +1,5 @@
 flask
 requests
 nltk
-scikit-learn
-pandas
-transformers
-torch
 numpy
-dotenv
+python-dotenv
