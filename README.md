@@ -1,10 +1,10 @@
 # Financial News Sentiment Analyzer
 
 ## Description
-A Python-based web application that performs sentiment analysis on financial news articles using the NewsAPI, BERT, and NLTK. The application scrapes recent financial news, analyzes the sentiment, and provides insights into the emotional tone of financial reporting.
+A Python-based web application that performs sentiment analysis on financial news articles using the Finnhub.org API, BERT, and NLTK. The application scrapes recent financial news, analyzes the sentiment, and provides insights into the emotional tone of financial reporting.
 
 ## Features
-- Fetch latest financial news using NewsAPI
+- Fetch latest financial news using Finnhub API
 - Perform sentiment analysis using BERT
 - Web interface to display news sentiment results
 - Categorize news articles by sentiment (positive, negative, neutral)
@@ -34,9 +34,9 @@ pip install -r requirements.txt
 
 ### Set Up Environment Variables
 1. Create a `.env` file in the project root
-2. Add your NewsAPI key:
+2. Add your Finnhub API key:
 ```
-NEWS_API_KEY=your_newsapi_key_here
+NEWS_API_KEY=your_Finnhub_API_key_here
 ```
 
 ## Running the Application
@@ -50,7 +50,7 @@ financial-news-sentiment-analyzer/
 │
 ├── scraper/               # News scraping module
 │   ├── __init__.py
-│   └── news_api.py        # NewsAPI integration
+│   └── news_api.py        # Finnhub API integration
 │
 ├── analyzer/              # Sentiment analysis module
 │   ├── __init__.py
@@ -68,7 +68,6 @@ financial-news-sentiment-analyzer/
 - Flask 2.3.3
 - Requests 2.31.0
 - NLTK 3.8.1
-- NewsAPI Python 0.2.7
 - Scikit-learn 1.3.0
 - Pandas 2.0.3
 
